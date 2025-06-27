@@ -222,6 +222,47 @@
       background: #252423;
       color: #f3f2f1;
     }
+    /* Mobile block overlay */
+    #mobileBlock {
+      display: none;
+      position: fixed;
+      z-index: 10000;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      background: #f3f2f1;
+      color: #323130;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      align-items: center;
+      justify-content: center;
+      flex-direction: column;
+      text-align: center;
+      padding: 2em 1em;
+    }
+    #mobileBlock .ms-Icon {
+      font-size: 3rem;
+      color: #0078d4;
+      margin-bottom: 1rem;
+    }
+    #mobileBlock .mobile-msg-title {
+      font-size: 1.5rem;
+      font-weight: 700;
+      margin-bottom: 0.5em;
+    }
+    #mobileBlock .mobile-msg-desc {
+      font-size: 1.1rem;
+      color: #605e5c;
+      margin-bottom: 1em;
+    }
+    @media (max-width: 700px), (pointer: coarse) and (max-width: 900px) {
+      #mobileBlock {
+        display: flex !important;
+      }
+      .container, .logo-title {
+        display: none !important;
+      }
+    }
     @media (max-width: 600px) {
       .container {
         margin: 0;
@@ -236,6 +277,15 @@
   </style>
 </head>
 <body>
+  <!-- Mobile Block Overlay -->
+  <div id="mobileBlock">
+    <span class="ms-Icon ms-Icon--Tablet"></span>
+    <div class="mobile-msg-title">Looply is not available on mobile</div>
+    <div class="mobile-msg-desc">
+      Please open this page on a Windows desktop or laptop browser for the best experience.
+    </div>
+  </div>
+
   <!-- Logo Title -->
   <div class="logo-title">
     <div class="looply-brand">
@@ -750,4 +800,3 @@
     });
   </script>
 </body>
-</html>
