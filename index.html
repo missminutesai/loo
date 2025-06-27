@@ -300,7 +300,7 @@
   </div>
 
   <!-- Edit Meeting Modal -->
-  <fluent-dialog id="editMeetingModal">
+  <fluent-dialog id="editMeetingModal" hidden>
     <form id="editMeetingForm" style="padding:1rem;max-width:350px;">
       <h3 style="margin-bottom:1rem;">Edit Meeting</h3>
       <label class="fluent-label" for="editTitle">Meeting Title</label>
@@ -320,7 +320,7 @@
   </fluent-dialog>
 
   <!-- Edit Profile Modal -->
-  <fluent-dialog id="editProfileModal">
+  <fluent-dialog id="editProfileModal" hidden>
     <form id="editProfileForm" style="padding:1rem;max-width:350px;">
       <h3 style="margin-bottom:1rem;">Edit Profile</h3>
       <label class="fluent-label" for="editEmail">Email address</label>
@@ -445,6 +445,9 @@
       mainContainer.style.display = 'none';
       loginContainer.style.display = '';
       loginForm.reset();
+      // Hide dialogs if open
+      document.getElementById('editProfileModal').hidden = true;
+      document.getElementById('editMeetingModal').hidden = true;
     };
 
     // Edit profile
@@ -452,10 +455,9 @@
       document.getElementById('editEmail').value = currentUser;
       document.getElementById('editProfileError').style.display = 'none';
       document.getElementById('editProfileModal').hidden = false;
-      document.getElementById('editProfileModal').show();
     };
     document.getElementById('cancelProfileBtn').onclick = function() {
-      document.getElementById('editProfileModal').hide();
+      document.getElementById('editProfileModal').hidden = true;
     };
     document.getElementById('editProfileForm').onsubmit = function(e) {
       e.preventDefault();
@@ -475,7 +477,7 @@
       localStorage.setItem('meetingUser', newEmail);
       userEmailSpan.textContent = newEmail;
       profileAvatar.textContent = getInitials(newEmail);
-      document.getElementById('editProfileModal').hide();
+      document.getElementById('editProfileModal').hidden = true;
       loadMeetings();
     };
 
@@ -596,10 +598,9 @@
       document.getElementById('editTime').value = m.time;
       document.getElementById('editMeetingError').style.display = 'none';
       document.getElementById('editMeetingModal').hidden = false;
-      document.getElementById('editMeetingModal').show();
     };
     document.getElementById('cancelEditBtn').onclick = function() {
-      document.getElementById('editMeetingModal').hide();
+      document.getElementById('editMeetingModal').hidden = true;
     };
     document.getElementById('editMeetingForm').onsubmit = function(e) {
       e.preventDefault();
@@ -630,7 +631,7 @@
       meetings[idx].date = date;
       meetings[idx].time = time;
       localStorage.setItem('meetings', JSON.stringify(meetings));
-      document.getElementById('editMeetingModal').hide();
+      document.getElementById('editMeetingModal').hidden = true;
       loadMeetings();
     };
 
@@ -718,6 +719,10 @@
         loginContainer.style.display = 'none';
         mainContainer.style.display = '';
         loadMeetings();
+      } else {
+        // Hide dialogs if not logged in
+        document.getElementById('editProfileModal').hidden = true;
+        document.getElementById('editMeetingModal').hidden = true;
       }
       if (localStorage.getItem('darkMode') === '1') {
         document.body.classList.add('dark-mode');
