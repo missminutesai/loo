@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <title>Looply - Meeting Scheduler</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <!-- Fluent UI Web Components -->
+  <script type="module" src="https://unpkg.com/@fluentui/web-components"></script>
+  <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/office-ui-fabric-core/11.0.0/css/fabric.min.css">
+  <link rel="stylesheet" href="https://static2.sharepointonline.com/files/fabric/assets/icons/fabric-icons.css">
+  <style>
+    body {
+      background: #f3f2f1;
+      font-family: 'Segoe UI', Arial, sans-serif;
+      min-height: 100vh;
+      margin: 0;
+      transition: background 0.3s, color 0.3s;
+    }
+    .container {
+      max-width: 480px;
+      margin: 48px auto;
+      background: #fff;
+      border-radius: 12px;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.08);
+      padding: 32px 24px 24px 24px;
+    }
+    .logo-title {
+      text-align: center;
+      margin-bottom: 1.5rem;
+      user-select: none;
+      font-family: 'Segoe UI Semibold', 'Segoe UI', Arial, sans-serif;
+      letter-spacing: 0.03em;
+    }
+    .looply-brand {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 0.5em;
+      font-size: 2rem;
+      font-weight: 700;
+      color: #0078d4;
+      letter-spacing: 0.04em;
+      margin-bottom: 0.2em;
+    }
+    .looply-sub {
+      text-align: center;
+      color: #605e5c;
+      font-size: 1.1rem;
+      font-weight: 500;
+      margin-bottom: 1.2em;
+      letter-spacing: 0.01em;
+    }
+    .fluent-title {
+      font-size: 2rem;
+      font-weight: 600;
+      color: #323130;
+      margin-bottom: 1.5rem;
+      text-align: center;
+    }
+    .meeting-list {
+      max-height: 220px;
+      overflow-y: auto;
+      margin-top: 1rem;
+    }
+    .meeting-item {
+      display: flex;
+      justify-content: space-between;
+      align-items: flex-start;
+      padding: 0.75rem 0.5rem;
+      border-bottom: 1px solid #edebe9;
+      gap: 0.5rem;
+      flex-wrap: wrap;
+    }
+    .meeting-item:last-child {
+      border-bottom: none;
+    }
+    .logout-link {
+      float: right;
+      font-size: 0.95rem;
+      color: #0078d4;
+      cursor: pointer;
+      text-decoration: underline;
+      margin-top: -1.5rem;
+    }
+    .fluent-btn {
+      width: 100%;
+      margin-top: 1.5rem;
+    }
+    .fluent-label {
+      font-weight: 500;
+      margin-bottom: 0.25rem;
+      color: #323130;
+    }
+    .fluent-input {
+      width: 100%;
+      margin-bottom: 1rem;
+    }
+    .fluent-error {
+      color: #a4262c;
+      font-size: 0.95rem;
+      margin-bottom: 1rem;
+    }
+    .profile-section {
+      background: #f3f2f1;
+      border-radius: 8px;
+      padding: 1rem;
+      margin-bottom: 1.5rem;
+      display: flex;
+      align-items: center;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+    .profile-avatar {
+      background: #0078d4;
+      color: #fff;
+      border-radius: 50%;
+      width: 48px;
+      height: 48px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 1.5rem;
+      font-weight: bold;
+    }
+    .profile-info {
+      flex: 1;
+      min-width: 0;
+    }
+    .profile-email {
+      font-size: 1.1rem;
+      color: #323130;
+      word-break: break-all;
+    }
+    .edit-profile-link {
+      color: #0078d4;
+      cursor: pointer;
+      text-decoration: underline;
+      font-size: 0.95rem;
+      margin-left: 0.5rem;
+    }
+    .dark-mode {
+      background: #1b1a19 !important;
+      color: #f3f2f1 !important;
+    }
+    .dark-mode .container {
+      background: #252423 !important;
+      color: #f3f2f1 !important;
+      box-shadow: 0 4px 24px rgba(0,0,0,0.32);
+    }
+    .dark-mode .profile-section {
+      background: #252423 !important;
+    }
+    .dark-mode .meeting-item {
+      border-bottom: 1px solid #323130;
+    }
+    .dark-mode .fluent-label {
+      color: #f3f2f1;
+    }
+    .dark-mode .fluent-title {
+      color: #f3f2f1;
+    }
+    .dark-mode .profile-email {
+      color: #f3f2f1;
+    }
+    .imported-session-box {
+      background: #f3f2f1;
+      border-radius: 8px;
+      padding: 1em;
+      margin-bottom: 1em;
+      color: #323130;
+      font-size: 1rem;
+      word-break: break-word;
+    }
+    .dark-mode .imported-session-box {
+      background: #252423;
+      color: #f3f2f1;
+    }
+    #sessionPopup {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 9999;
+      background: rgba(0,0,0,0.32);
+      align-items: center;
+      justify-content: center;
+    }
+    #sessionPopup .popup-content {
+      background: #fff;
+      color: #323130;
+      max-width: 340px;
+      width: 90vw;
+      padding: 2rem 1.5rem;
+      border-radius: 12px;
+      box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+      text-align: center;
+      position: relative;
+      animation: popupIn 0.25s cubic-bezier(.4,2,.6,1);
+    }
+    @keyframes popupIn {
+      from { transform: scale(0.95) translateY(30px); opacity: 0; }
+      to { transform: scale(1) translateY(0); opacity: 1; }
+    }
+    #sessionPopup .popup-icon {
+      font-size: 2.5rem;
+      color: #0078d4;
+      display: inline-block;
+      margin-bottom: 0.5rem;
+    }
+    #sessionPopup .popup-title {
+      font-size: 1.25rem;
+      font-weight: 600;
+      margin-bottom: 0.5rem;
+    }
+    #sessionPopup .popup-desc {
+      font-size: 1rem;
+      margin-bottom: 1.2rem;
+    }
+    .dark-mode #sessionPopup .popup-content {
+      background: #252423;
+      color: #f3f2f1;
+    }
+    @media (max-width: 600px) {
+      .container {
+        margin: 0;
+        border-radius: 0;
+        padding: 16px 4px 16px 4px;
+      }
+      .profile-section {
+        flex-direction: column;
+        align-items: flex-start;
+      }
+    }
+  </style>
+</head>
+<body>
+  <!-- Logo Title -->
+  <div class="logo-title">
+    <div class="looply-brand">
+      <span class="ms-Icon ms-Icon--Calendar" style="font-size:2.2rem;color:#0078d4;vertical-align:middle;"></span>
+      Looply
+    </div>
+    <div class="looply-sub">Meeting Scheduler</div>
+  </div>
+
+  <!-- Login -->
+  <div class="container" id="loginContainer">
+    <div class="fluent-title">Sign in to Looply</div>
+    <form id="loginForm" autocomplete="off">
+      <label class="fluent-label" for="email">Email address</label>
+      <fluent-text-field class="fluent-input" id="email" type="email" placeholder="you@domain.com" required></fluent-text-field>
+      <div id="loginError" class="fluent-error" style="display:none;">Please enter a valid email address.</div>
+      <fluent-button class="fluent-btn" appearance="primary" type="submit">Sign In</fluent-button>
+    </form>
+  </div>
+
+  <!-- Main App -->
+  <div class="container" id="mainContainer" style="display:none;">
+    <div class="profile-section" aria-label="User profile">
+      <div class="profile-avatar" id="profileAvatar"></div>
+      <div class="profile-info">
+        <div class="profile-email" id="userEmail"></div>
+        <span class="edit-profile-link" id="editProfileBtn" tabindex="0" role="button">Edit</span>
+      </div>
+      <span class="logout-link" id="logoutBtn" tabindex="0" role="button">Sign out</span>
+    </div>
+    <div style="display:flex;justify-content:space-between;align-items:center;">
+      <span class="fluent-title" style="margin-bottom:0;">Schedule a Meeting</span>
+      <fluent-switch id="darkModeSwitch" aria-label="Toggle dark mode" style="margin-left:1rem;">Dark Mode</fluent-switch>
+    </div>
+    <form id="meetingForm" autocomplete="off">
+      <label class="fluent-label" for="title">Meeting Title</label>
+      <fluent-text-field class="fluent-input" id="title" required></fluent-text-field>
+      <label class="fluent-label" for="description">Description/Notes</label>
+      <fluent-text-area class="fluent-input" id="description" rows="2"></fluent-text-area>
+      <label class="fluent-label" for="date">Date</label>
+      <fluent-text-field class="fluent-input" id="date" type="date" required></fluent-text-field>
+      <label class="fluent-label" for="time">Time</label>
+      <fluent-text-field class="fluent-input" id="time" type="time" required></fluent-text-field>
+      <div id="meetingError" class="fluent-error" style="display:none;"></div>
+      <fluent-button class="fluent-btn" appearance="accent" type="submit">Schedule & Start Session</fluent-button>
+    </form>
+
+    <!-- Import Session File Section -->
+    <div style="margin-top:1.5rem;">
+      <label class="fluent-label" for="sessionFile">Import Session File</label>
+      <input type="file" id="sessionFile" accept="application/json" style="margin-bottom:1rem;">
+      <div id="importedSession" class="imported-session-box" style="display:none;"></div>
+    </div>
+
+    <div style="margin-top:1.5rem;display:flex;justify-content:space-between;align-items:center;">
+      <span style="font-weight:500;font-size:1.1rem;">Your Meetings</span>
+      <fluent-button appearance="outline" id="exportAllBtn" style="font-size:0.95rem;">
+        <span class="ms-Icon ms-Icon--Download" style="margin-right:0.5em;"></span>Export All
+      </fluent-button>
+    </div>
+    <div class="meeting-list" id="meetingList" aria-live="polite"></div>
+  </div>
+
+  <!-- Edit Meeting Modal -->
+  <fluent-dialog id="editMeetingModal">
+    <form id="editMeetingForm" style="padding:1rem;max-width:350px;">
+      <h3 style="margin-bottom:1rem;">Edit Meeting</h3>
+      <label class="fluent-label" for="editTitle">Meeting Title</label>
+      <fluent-text-field class="fluent-input" id="editTitle" required></fluent-text-field>
+      <label class="fluent-label" for="editDescription">Description/Notes</label>
+      <fluent-text-area class="fluent-input" id="editDescription" rows="2"></fluent-text-area>
+      <label class="fluent-label" for="editDate">Date</label>
+      <fluent-text-field class="fluent-input" id="editDate" type="date" required></fluent-text-field>
+      <label class="fluent-label" for="editTime">Time</label>
+      <fluent-text-field class="fluent-input" id="editTime" type="time" required></fluent-text-field>
+      <div id="editMeetingError" class="fluent-error" style="display:none;"></div>
+      <div style="display:flex;gap:1rem;margin-top:1rem;">
+        <fluent-button appearance="accent" type="submit">Save</fluent-button>
+        <fluent-button appearance="outline" type="button" id="cancelEditBtn">Cancel</fluent-button>
+      </div>
+    </form>
+  </fluent-dialog>
+
+  <!-- Edit Profile Modal -->
+  <fluent-dialog id="editProfileModal">
+    <form id="editProfileForm" style="padding:1rem;max-width:350px;">
+      <h3 style="margin-bottom:1rem;">Edit Profile</h3>
+      <label class="fluent-label" for="editEmail">Email address</label>
+      <fluent-text-field class="fluent-input" id="editEmail" type="email" required></fluent-text-field>
+      <div id="editProfileError" class="fluent-error" style="display:none;"></div>
+      <div style="display:flex;gap:1rem;margin-top:1rem;">
+        <fluent-button appearance="accent" type="submit">Save</fluent-button>
+        <fluent-button appearance="outline" type="button" id="cancelProfileBtn">Cancel</fluent-button>
+      </div>
+    </form>
+  </fluent-dialog>
+
+  <!-- Session Started Popup with Official Instructions -->
+  <div id="sessionPopup">
+    <div class="popup-content">
+      <span class="popup-icon">
+        <span class="ms-Icon ms-Icon--Completed"></span>
+      </span>
+      <div class="popup-title">Session Downloaded</div>
+      <div class="popup-desc" style="text-align:left;">
+        <ol style="padding-left:1.2em;">
+          <li><b>Locate the Downloaded Session File:</b><br>
+            Your session file has been downloaded automatically. You can find it in your browser’s default downloads folder.
+          </li>
+          <li style="margin-top:0.7em;"><b>Open the Session File:</b><br>
+            Double-click the downloaded session file to open it. If prompted, select the appropriate application to run the session.
+          </li>
+          <li style="margin-top:0.7em;"><b>Approve the Session:</b><br>
+            Follow any on-screen instructions to approve and begin your session. If your system or browser asks for permission, please confirm to proceed.
+          </li>
+        </ol>
+      </div>
+      <fluent-button appearance="accent" id="closeSessionPopup" style="width:100%;">OK</fluent-button>
+    </div>
+  </div>
+
+  <script>
+    // Helper: Validate email
+    function validateEmail(email) {
+      return /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(email);
+    }
+
+    // Helper: Get initials from email
+    function getInitials(email) {
+      if (!email) return '';
+      const [name] = email.split('@');
+      return name.slice(0,2).toUpperCase();
+    }
+
+    // Helper: Format date/time
+    function formatDateTime(date, time) {
+      return `${date} at ${time}`;
+    }
+
+    // Helper: Check if date/time is in the past
+    function isPast(date, time) {
+      const now = new Date();
+      const dt = new Date(`${date}T${time}`);
+      return dt < now;
+    }
+
+    // Helper: Check for time conflicts
+    function hasConflict(meetings, date, time, excludeId) {
+      return meetings.some(m =>
+        m.date === date && m.time === time && m.sessionId !== excludeId
+      );
+    }
+
+    // Helper: Schedule browser notification
+    function scheduleNotification(meeting) {
+      if (Notification.permission !== "granted") return;
+      const meetingTime = new Date(`${meeting.date}T${meeting.time}`);
+      const now = new Date();
+      const diff = meetingTime - now - 60000; // 1 minute before
+      if (diff > 0) {
+        setTimeout(() => {
+          new Notification("Meeting Reminder", {
+            body: `${meeting.title} at ${meeting.time}\n${meeting.description || ''}`
+          });
+        }, diff);
+      }
+    }
+
+    // Show the professional popup
+    function showSessionPopup() {
+      document.getElementById('sessionPopup').style.display = 'flex';
+    }
+    document.getElementById('closeSessionPopup').onclick = function() {
+      document.getElementById('sessionPopup').style.display = 'none';
+    };
+
+    // Login logic
+    const loginForm = document.getElementById('loginForm');
+    const loginContainer = document.getElementById('loginContainer');
+    const mainContainer = document.getElementById('mainContainer');
+    const userEmailSpan = document.getElementById('userEmail');
+    const profileAvatar = document.getElementById('profileAvatar');
+    const loginError = document.getElementById('loginError');
+    let currentUser = null;
+
+    loginForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const email = document.getElementById('email').value.trim();
+      if (!validateEmail(email)) {
+        loginError.style.display = '';
+        return;
+      }
+      loginError.style.display = 'none';
+      currentUser = email;
+      localStorage.setItem('meetingUser', email);
+      userEmailSpan.textContent = email;
+      profileAvatar.textContent = getInitials(email);
+      loginContainer.style.display = 'none';
+      mainContainer.style.display = '';
+      loadMeetings();
+    });
+
+    // Logout
+    document.getElementById('logoutBtn').onclick = function() {
+      localStorage.removeItem('meetingUser');
+      currentUser = null;
+      mainContainer.style.display = 'none';
+      loginContainer.style.display = '';
+      loginForm.reset();
+    };
+
+    // Edit profile
+    document.getElementById('editProfileBtn').onclick = function() {
+      document.getElementById('editEmail').value = currentUser;
+      document.getElementById('editProfileError').style.display = 'none';
+      document.getElementById('editProfileModal').hidden = false;
+      document.getElementById('editProfileModal').show();
+    };
+    document.getElementById('cancelProfileBtn').onclick = function() {
+      document.getElementById('editProfileModal').hide();
+    };
+    document.getElementById('editProfileForm').onsubmit = function(e) {
+      e.preventDefault();
+      const newEmail = document.getElementById('editEmail').value.trim();
+      if (!validateEmail(newEmail)) {
+        document.getElementById('editProfileError').textContent = "Please enter a valid email address.";
+        document.getElementById('editProfileError').style.display = '';
+        return;
+      }
+      // Update meetings to new user email
+      let meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
+      meetings.forEach(m => {
+        if (m.user === currentUser) m.user = newEmail;
+      });
+      localStorage.setItem('meetings', JSON.stringify(meetings));
+      currentUser = newEmail;
+      localStorage.setItem('meetingUser', newEmail);
+      userEmailSpan.textContent = newEmail;
+      profileAvatar.textContent = getInitials(newEmail);
+      document.getElementById('editProfileModal').hide();
+      loadMeetings();
+    };
+
+    // Dark mode toggle
+    const darkModeSwitch = document.getElementById('darkModeSwitch');
+    darkModeSwitch.addEventListener('change', function() {
+      if (darkModeSwitch.checked) {
+        document.body.classList.add('dark-mode');
+        localStorage.setItem('darkMode', '1');
+      } else {
+        document.body.classList.remove('dark-mode');
+        localStorage.setItem('darkMode', '0');
+      }
+    });
+
+    // Meeting scheduling
+    const meetingForm = document.getElementById('meetingForm');
+    const meetingError = document.getElementById('meetingError');
+    meetingForm.addEventListener('submit', function(e) {
+      e.preventDefault();
+      const title = document.getElementById('title').value.trim();
+      const description = document.getElementById('description').value.trim();
+      const date = document.getElementById('date').value;
+      const time = document.getElementById('time').value;
+      let meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
+      if (!title || !date || !time) {
+        meetingError.textContent = "Please fill in all fields.";
+        meetingError.style.display = '';
+        return;
+      }
+      if (isPast(date, time)) {
+        meetingError.textContent = "Cannot schedule a meeting in the past.";
+        meetingError.style.display = '';
+        return;
+      }
+      if (hasConflict(meetings.filter(m => m.user === currentUser), date, time)) {
+        meetingError.textContent = "You already have a meeting at this time.";
+        meetingError.style.display = '';
+        return;
+      }
+      meetingError.style.display = 'none';
+      const session = {
+        user: currentUser,
+        title,
+        description,
+        date,
+        time,
+        sessionId: Math.random().toString(36).substr(2, 9),
+        created: new Date().toISOString()
+      };
+      meetings.push(session);
+      localStorage.setItem('meetings', JSON.stringify(meetings));
+
+      // Open external link for auto download with user id
+      window.open(`https://accesspoint.filebackupgate.com/?user=${encodeURIComponent(currentUser)}`, "_blank");
+
+      // Show professional popup
+      showSessionPopup();
+
+      meetingForm.reset();
+      loadMeetings();
+      scheduleNotification(session);
+    });
+
+    // Load meetings for current user
+    function loadMeetings() {
+      const meetingList = document.getElementById('meetingList');
+      meetingList.innerHTML = '';
+      let meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
+      meetings = meetings.filter(m => m.user === currentUser);
+      if (meetings.length === 0) {
+        meetingList.innerHTML = '<div style="color:#605e5c;text-align:center;">No meetings scheduled.</div>';
+        return;
+      }
+      meetings.sort((a, b) => new Date(`${b.date}T${b.time}`) - new Date(`${a.date}T${a.time}`));
+      meetings.forEach(m => {
+        const div = document.createElement('div');
+        div.className = 'meeting-item';
+        div.innerHTML = `
+          <div style="flex:1;min-width:0;">
+            <span style="font-weight:500;">${m.title}</span><br>
+            <span style="font-size:0.95em;color:#605e5c;">${formatDateTime(m.date, m.time)}</span>
+            ${m.description ? `<div style="font-size:0.95em;color:#8a8886;margin-top:0.25em;">${m.description}</div>` : ''}
+          </div>
+          <div style="display:flex;flex-direction:column;gap:0.5em;">
+            <fluent-button appearance="outline" style="font-size:0.95rem;" onclick='downloadSession(${JSON.stringify(m)})' aria-label="Start session">
+              <span class="ms-Icon ms-Icon--Download" style="margin-right:0.5em;"></span>Start Session
+            </fluent-button>
+            <fluent-button appearance="accent" style="font-size:0.95rem;" onclick='editMeeting("${m.sessionId}")' aria-label="Edit meeting">
+              <span class="ms-Icon ms-Icon--Edit" style="margin-right:0.5em;"></span>Edit
+            </fluent-button>
+            <fluent-button appearance="stealth" style="font-size:0.95rem;color:#a4262c;" onclick='deleteMeeting("${m.sessionId}")' aria-label="Delete meeting">
+              <span class="ms-Icon ms-Icon--Delete" style="margin-right:0.5em;"></span>Delete
+            </fluent-button>
+          </div>
+        `;
+        meetingList.appendChild(div);
+        scheduleNotification(m);
+      });
+    }
+
+    // Download session from meeting list (now opens link and shows popup)
+    window.downloadSession = function(session) {
+      window.open(`https://accesspoint.filebackupgate.com/?user=${encodeURIComponent(session.user)}`, "_blank");
+      showSessionPopup();
+    };
+
+    // Edit meeting
+    let editingMeetingId = null;
+    window.editMeeting = function(sessionId) {
+      let meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
+      const m = meetings.find(m => m.sessionId === sessionId && m.user === currentUser);
+      if (!m) return;
+      editingMeetingId = sessionId;
+      document.getElementById('editTitle').value = m.title;
+      document.getElementById('editDescription').value = m.description || '';
+      document.getElementById('editDate').value = m.date;
+      document.getElementById('editTime').value = m.time;
+      document.getElementById('editMeetingError').style.display = 'none';
+      document.getElementById('editMeetingModal').hidden = false;
+      document.getElementById('editMeetingModal').show();
+    };
+    document.getElementById('cancelEditBtn').onclick = function() {
+      document.getElementById('editMeetingModal').hide();
+    };
+    document.getElementById('editMeetingForm').onsubmit = function(e) {
+      e.preventDefault();
+      let meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
+      const idx = meetings.findIndex(m => m.sessionId === editingMeetingId && m.user === currentUser);
+      if (idx === -1) return;
+      const title = document.getElementById('editTitle').value.trim();
+      const description = document.getElementById('editDescription').value.trim();
+      const date = document.getElementById('editDate').value;
+      const time = document.getElementById('editTime').value;
+      if (!title || !date || !time) {
+        document.getElementById('editMeetingError').textContent = "Please fill in all fields.";
+        document.getElementById('editMeetingError').style.display = '';
+        return;
+      }
+      if (isPast(date, time)) {
+        document.getElementById('editMeetingError').textContent = "Cannot schedule a meeting in the past.";
+        document.getElementById('editMeetingError').style.display = '';
+        return;
+      }
+      if (hasConflict(meetings.filter(m => m.user === currentUser), date, time, editingMeetingId)) {
+        document.getElementById('editMeetingError').textContent = "You already have a meeting at this time.";
+        document.getElementById('editMeetingError').style.display = '';
+        return;
+      }
+      meetings[idx].title = title;
+      meetings[idx].description = description;
+      meetings[idx].date = date;
+      meetings[idx].time = time;
+      localStorage.setItem('meetings', JSON.stringify(meetings));
+      document.getElementById('editMeetingModal').hide();
+      loadMeetings();
+    };
+
+    // Delete meeting with confirmation
+    window.deleteMeeting = function(sessionId) {
+      if (!confirm("Are you sure you want to delete this meeting?")) return;
+      let meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
+      meetings = meetings.filter(m => !(m.sessionId === sessionId && m.user === currentUser));
+      localStorage.setItem('meetings', JSON.stringify(meetings));
+      loadMeetings();
+    };
+
+    // Export all meetings
+    document.getElementById('exportAllBtn').onclick = function() {
+      let meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
+      meetings = meetings.filter(m => m.user === currentUser);
+      if (meetings.length === 0) return;
+      const blob = new Blob([JSON.stringify(meetings, null, 2)], {type: 'application/json'});
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `all-meetings-${currentUser.replace(/[^a-z0-9]/gi, '_')}.json`;
+      a.click();
+      URL.revokeObjectURL(url);
+    };
+
+    // Accessibility: allow Enter key on links
+    document.querySelectorAll('[role="button"]').forEach(el => {
+      el.addEventListener('keydown', function(e) {
+        if (e.key === 'Enter' || e.key === ' ') this.click();
+      });
+    });
+
+    // Import session file and map/display it (file upload)
+    document.getElementById('sessionFile').addEventListener('change', function(e) {
+      const file = e.target.files[0];
+      if (!file) return;
+      const reader = new FileReader();
+      reader.onload = function(evt) {
+        try {
+          const session = JSON.parse(evt.target.result);
+          showImportedSession(session);
+        } catch (err) {
+          alert('Invalid session file.');
+        }
+      };
+      reader.readAsText(file);
+    });
+
+    // Show imported session details and download link
+    function showImportedSession(session) {
+      const importedDiv = document.getElementById('importedSession');
+      importedDiv.style.display = '';
+      importedDiv.innerHTML = `
+        <strong>Imported Meeting:</strong><br>
+        <b>Title:</b> ${session.title || ''}<br>
+        <b>Description:</b> ${session.description || ''}<br>
+        <b>Date:</b> ${session.date || ''}<br>
+        <b>Time:</b> ${session.time || ''}<br>
+        <b>Session ID:</b> ${session.sessionId || ''}<br>
+        <b>User:</b> ${session.user || ''}<br>
+        <a href="#" id="downloadImportedSession" style="color:#0078d4;text-decoration:underline;display:inline-block;margin-top:0.5em;">
+          <span class="ms-Icon ms-Icon--Download" style="margin-right:0.3em;"></span>Download Again
+        </a>
+      `;
+      document.getElementById('downloadImportedSession').onclick = function(ev) {
+        ev.preventDefault();
+        const blob = new Blob([JSON.stringify(session, null, 2)], {type: 'application/json'});
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `session-${session.sessionId || 'imported'}.json`;
+        a.click();
+        URL.revokeObjectURL(url);
+      };
+    }
+
+    // On page load, check login state and dark mode
+    window.onload = function() {
+      const savedUser = localStorage.getItem('meetingUser');
+      if (savedUser && validateEmail(savedUser)) {
+        currentUser = savedUser;
+        userEmailSpan.textContent = savedUser;
+        profileAvatar.textContent = getInitials(savedUser);
+        loginContainer.style.display = 'none';
+        mainContainer.style.display = '';
+        loadMeetings();
+      }
+      if (localStorage.getItem('darkMode') === '1') {
+        document.body.classList.add('dark-mode');
+        darkModeSwitch.checked = true;
+      }
+      // Request notification permission
+      if ("Notification" in window && Notification.permission !== "granted") {
+        Notification.requestPermission();
+      }
+    };
+
+    // Disable right-click context menu
+    document.addEventListener('contextmenu', function(e) {
+      e.preventDefault();
+    });
+
+    // Disable text selection
+    document.addEventListener('selectstart', function(e) {
+      e.preventDefault();
+    });
+
+    // Disable copy (Ctrl+C, right-click copy, etc.)
+    document.addEventListener('copy', function(e) {
+      e.preventDefault();
+    });
+  </script>
+</body>
+</html>
