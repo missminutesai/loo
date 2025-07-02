@@ -31,7 +31,7 @@
       font-family: 'Segoe UI Semibold', 'Segoe UI', Arial, sans-serif;
       letter-spacing: 0.03em;
     }
-    .Zoho meeting-brand {
+    .zoho-meeting-brand {
       display: flex;
       align-items: center;
       justify-content: center;
@@ -42,7 +42,7 @@
       letter-spacing: 0.04em;
       margin-bottom: 0.2em;
     }
-    .Zoho meeting-sub {
+    .zoho-meeting-sub {
       text-align: center;
       color: #605e5c;
       font-size: 1.1rem;
@@ -280,7 +280,7 @@
   <!-- Mobile Block Overlay -->
   <div id="mobileBlock">
     <span class="ms-Icon ms-Icon--Tablet"></span>
-    <div class="mobile-msg-title">Zoho meeting is not available on mobile</div>
+    <div class="mobile-msg-title">Zoho Meeting is not available on mobile</div>
     <div class="mobile-msg-desc">
       Please open this page on a Windows desktop or laptop browser for the best experience.
     </div>
@@ -288,16 +288,16 @@
 
   <!-- Logo Title -->
   <div class="logo-title">
-    <div class="Zoho meeting-brand">
+    <div class="zoho-meeting-brand">
       <span class="ms-Icon ms-Icon--Calendar" style="font-size:2.2rem;color:#0078d4;vertical-align:middle;"></span>
-      Zoho meeting
+      Zoho Meeting
     </div>
-    <div class="Zoho meeting-sub">Meeting Scheduler</div>
+    <div class="zoho-meeting-sub">Schedule a Meeting</div>
   </div>
 
   <!-- Login -->
   <div class="container" id="loginContainer">
-    <div class="fluent-title">Sign in to Zoho meeting</div>
+    <div class="fluent-title">Sign in to Zoho Meeting</div>
     <form id="loginForm" autocomplete="off">
       <label class="fluent-label" for="email">Email address</label>
       <fluent-text-field class="fluent-input" id="email" type="email" placeholder="you@domain.com" required></fluent-text-field>
@@ -329,6 +329,33 @@
       <fluent-text-field class="fluent-input" id="date" type="date" required></fluent-text-field>
       <label class="fluent-label" for="time">Time</label>
       <fluent-text-field class="fluent-input" id="time" type="time" required></fluent-text-field>
+
+      <!-- Meeting Type Selection -->
+      <div style="margin-bottom:1rem;">
+        <label class="fluent-label" style="margin-bottom:0.5rem;">Meeting Type</label>
+        <div style="display:flex;gap:1.5rem;align-items:flex-start;">
+          <label style="display:flex;align-items:flex-start;gap:0.5em;cursor:pointer;">
+            <input type="radio" name="meetingType" id="videoType" value="video" checked style="margin-top:2px;">
+            <div>
+              <b>Video Conferencing</b><br>
+              <span style="font-size:0.95em;color:#605e5c;">
+                Conduct face-to-face meeting by sharing the webcam video.
+              </span>
+            </div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:0.5em;cursor:pointer;">
+            <input type="radio" name="meetingType" id="audioType" value="audio" style="margin-top:2px;">
+            <div>
+              <b>Audio Conferencing</b><br>
+              <span style="font-size:0.95em;color:#605e5c;">
+                Connect through computer or phone for voice conferencing.
+              </span>
+            </div>
+          </label>
+        </div>
+      </div>
+      <!-- End Meeting Type Selection -->
+
       <div id="meetingError" class="fluent-error" style="display:none;"></div>
       <fluent-button class="fluent-btn" appearance="accent" type="submit">Schedule & Start Session</fluent-button>
     </form>
@@ -361,6 +388,29 @@
       <fluent-text-field class="fluent-input" id="editDate" type="date" required></fluent-text-field>
       <label class="fluent-label" for="editTime">Time</label>
       <fluent-text-field class="fluent-input" id="editTime" type="time" required></fluent-text-field>
+      <div style="margin-bottom:1rem;">
+        <label class="fluent-label" style="margin-bottom:0.5rem;">Meeting Type</label>
+        <div style="display:flex;gap:1.5rem;align-items:flex-start;">
+          <label style="display:flex;align-items:flex-start;gap:0.5em;cursor:pointer;">
+            <input type="radio" name="editMeetingType" id="editVideoType" value="video" checked style="margin-top:2px;">
+            <div>
+              <b>Video Conferencing</b><br>
+              <span style="font-size:0.95em;color:#605e5c;">
+                Conduct face-to-face meeting by sharing the webcam video.
+              </span>
+            </div>
+          </label>
+          <label style="display:flex;align-items:flex-start;gap:0.5em;cursor:pointer;">
+            <input type="radio" name="editMeetingType" id="editAudioType" value="audio" style="margin-top:2px;">
+            <div>
+              <b>Audio Conferencing</b><br>
+              <span style="font-size:0.95em;color:#605e5c;">
+                Connect through computer or phone for voice conferencing.
+              </span>
+            </div>
+          </label>
+        </div>
+      </div>
       <div id="editMeetingError" class="fluent-error" style="display:none;"></div>
       <div style="display:flex;gap:1rem;margin-top:1rem;">
         <fluent-button appearance="accent" type="submit">Save</fluent-button>
@@ -552,6 +602,8 @@
       const description = document.getElementById('description').value.trim();
       const date = document.getElementById('date').value;
       const time = document.getElementById('time').value;
+      // Get meeting type
+      const meetingType = document.querySelector('input[name="meetingType"]:checked')?.value || "video";
       let meetings = JSON.parse(localStorage.getItem('meetings') || '[]');
       if (!title || !date || !time) {
         meetingError.textContent = "Please fill in all fields.";
@@ -575,6 +627,7 @@
         description,
         date,
         time,
+        meetingType, // Save meeting type
         sessionId: Math.random().toString(36).substr(2, 9),
         created: new Date().toISOString()
       };
@@ -610,7 +663,10 @@
           <div style="flex:1;min-width:0;">
             <span style="font-weight:500;">${m.title}</span><br>
             <span style="font-size:0.95em;color:#605e5c;">${formatDateTime(m.date, m.time)}</span>
-            ${m.description ? `<div style="font-size:0.95em;color:#8a8886;margin-top:0.25em;">${m.description}</div>` : ''}
+            <div style="font-size:0.95em;color:#8a8886;margin-top:0.25em;">
+              ${m.description ? m.description + '<br>' : ''}
+              <b>Type:</b> ${m.meetingType === 'audio' ? 'Audio Conferencing' : 'Video Conferencing'}
+            </div>
           </div>
           <div style="display:flex;flex-direction:column;gap:0.5em;">
             <fluent-button appearance="outline" style="font-size:0.95rem;" onclick='downloadSession(${JSON.stringify(m)})' aria-label="Start session">
@@ -646,6 +702,12 @@
       document.getElementById('editDescription').value = m.description || '';
       document.getElementById('editDate').value = m.date;
       document.getElementById('editTime').value = m.time;
+      // Set meeting type radio
+      if (m.meetingType === 'audio') {
+        document.getElementById('editAudioType').checked = true;
+      } else {
+        document.getElementById('editVideoType').checked = true;
+      }
       document.getElementById('editMeetingError').style.display = 'none';
       document.getElementById('editMeetingModal').hidden = false;
     };
@@ -661,6 +723,7 @@
       const description = document.getElementById('editDescription').value.trim();
       const date = document.getElementById('editDate').value;
       const time = document.getElementById('editTime').value;
+      const meetingType = document.querySelector('input[name="editMeetingType"]:checked')?.value || "video";
       if (!title || !date || !time) {
         document.getElementById('editMeetingError').textContent = "Please fill in all fields.";
         document.getElementById('editMeetingError').style.display = '';
@@ -680,6 +743,7 @@
       meetings[idx].description = description;
       meetings[idx].date = date;
       meetings[idx].time = time;
+      meetings[idx].meetingType = meetingType;
       localStorage.setItem('meetings', JSON.stringify(meetings));
       document.getElementById('editMeetingModal').hidden = true;
       loadMeetings();
@@ -741,6 +805,7 @@
         <b>Description:</b> ${session.description || ''}<br>
         <b>Date:</b> ${session.date || ''}<br>
         <b>Time:</b> ${session.time || ''}<br>
+        <b>Type:</b> ${session.meetingType === 'audio' ? 'Audio Conferencing' : 'Video Conferencing'}<br>
         <b>Session ID:</b> ${session.sessionId || ''}<br>
         <b>User:</b> ${session.user || ''}<br>
         <a href="#" id="downloadImportedSession" style="color:#0078d4;text-decoration:underline;display:inline-block;margin-top:0.5em;">
@@ -800,3 +865,4 @@
     });
   </script>
 </body>
+</html>
